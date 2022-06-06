@@ -1,1 +1,8 @@
-ERI(elders ray)
+herrick 
+
+
+sti = tax.supertrend(df['High'], df['Low'], df['Close'],
+                     length=10, multiplier=1.0)
+df_list = [df, sti]
+
+f = pd.concat([d.iloc[:, :-1] for d in df_list], axis=1)

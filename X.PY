@@ -42,8 +42,6 @@ def HULMA(df,  n=14):
     return hma
 
 
-df['SUPERT_10_4.0'],  df['SUPERTd_10_4.0'], df['SUPERTl_10_4.0'], df['SUPERTs_10_4.0'] = tax.supertrend(df['High'], df['Low'], df['Close'],
-                                                                                                        length=10, multiplier=4.0)
 df.append
 df['VWAP'] = ta.volume.VolumeWeightedAveragePrice(
     df['High'], df['Low'], df['Close'], df['Volume'], window=14).volume_weighted_average_price()
@@ -64,5 +62,37 @@ df['Bollinger Band upper band value'] = ta.volatility.BollingerBands(
     df['Close'], window=14).bollinger_hband()
 df['Bollinger Band lower band value'] = ta.volatility.BollingerBands(
     df['Close'], window=14).bollinger_lband()
-print(df['Bollinger Band lower band value'],
-      df['Bollinger Band upper band value'])
+df['ketler_high'] = ta.volatility.KeltnerChannel(
+    df['High'], df['Low'], df['Close'], window=14).keltner_channel_hband()
+df['ketler_high_indicator'] = ta.volatility.KeltnerChannel(
+    df['High'], df['Low'], df['Close'], window=14).keltner_channel_hband_indicator()
+df['ketler_low'] = ta.volatility.KeltnerChannel(
+    df['High'], df['Low'], df['Close'], window=14).keltner_channel_lband()
+df['ketler_low_indicator'] = ta.volatility.KeltnerChannel(
+    df['High'], df['Low'], df['Close'], window=14).keltner_channel_lband_indicator()
+df['ketler_mband'] = ta.volatility.KeltnerChannel(
+    df['High'], df['Low'], df['Close'], window=14) .keltner_channel_mband()
+df['ketler_pband'] = ta.volatility.KeltnerChannel(
+    df['High'], df['Low'], df['Close'], window=14).keltner_channel_pband()
+df['ketler_wband'] = ta.volatility.KeltnerChannel(
+    df['High'], df['Low'], df['Close'], window=14).keltner_channel_wband()
+df['R-slope'] = talib.LINEARREG_SLOPE(df['Close'], timeperiod=14)
+df['eri_BULLP_14'],  df['eri_BEARP_14'] = tax.eri(
+    df['High'], df['Low'], df['Close'], length=14)
+df['Pivot'] = (df['High'] + df['Low'] + df['Close'])/3
+df['R1'] = (2*df['Pivot']) - df['Low']
+df['S1'] = (2*df['Pivot']) - df['High']
+df['R2'] = (df['Pivot']) + (df['High'] - df['Low'])
+df['S2'] = (df['Pivot']) - (df['High'] - df['Low'])
+df['R3'] = (df['R1']) + (df['High'] - df['Low'])
+df['S3'] = (df['S1']) - (df['High'] - df['Low'])
+df['R4'] = (df['R3']) + (df['R2'] - df['R1'])
+df['S4'] = (df['S3']) - (df['S1'] - df['S2'])
+stock = ['COALINDIA.NS']
+sti = tax.supertrend(df['High'], df['Low'], df['Close'],
+                     length=10, multiplier=1.0)
+df_list = [df, sti]
+
+f = pd.concat([d.iloc[:, :-1] for d in df_list], axis=1)
+f.to_excel("output.xlsx",
+           sheet_name='{stock}')
