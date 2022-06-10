@@ -8,6 +8,7 @@ import yfinance as yf
 import talib
 import math
 import pandas_ta as tax
+from technical.indicators import piv
 df = yf.download('COALINDIA.NS', period='max',
                  start='2022-01-01', end='2022-06-06')
 df['rsi'] = ta.momentum.RSIIndicator(df['Close'], window=14).rsi()
@@ -77,22 +78,7 @@ df['ketler_pband'] = ta.volatility.KeltnerChannel(
 df['ketler_wband'] = ta.volatility.KeltnerChannel(
     df['High'], df['Low'], df['Close'], window=14).keltner_channel_wband()
 df['R-slope'] = talib.LINEARREG_SLOPE(df['Close'], timeperiod=14)
-df['eri_BULLP_14'],  df['eri_BEARP_14'] = tax.eri(
+x = tax.eri(
     df['High'], df['Low'], df['Close'], length=14)
-df['Pivot'] = (df['High'] + df['Low'] + df['Close'])/3
-df['R1'] = (2*df['Pivot']) - df['Low']
-df['S1'] = (2*df['Pivot']) - df['High']
-df['R2'] = (df['Pivot']) + (df['High'] - df['Low'])
-df['S2'] = (df['Pivot']) - (df['High'] - df['Low'])
-df['R3'] = (df['R1']) + (df['High'] - df['Low'])
-df['S3'] = (df['S1']) - (df['High'] - df['Low'])
-df['R4'] = (df['R3']) + (df['R2'] - df['R1'])
-df['S4'] = (df['S3']) - (df['S1'] - df['S2'])
-stock = ['COALINDIA.NS']
-sti = tax.supertrend(df['High'], df['Low'], df['Close'],
-                     length=10, multiplier=1.0)
-df_list = [df, sti]
-
-f = pd.concat([d.iloc[:, :-1] for d in df_list], axis=1)
-f.to_excel("output.xlsx",
-           sheet_name='{stock}')
+df.append(x)
+print(df.columns)
