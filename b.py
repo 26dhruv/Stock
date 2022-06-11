@@ -1,5 +1,6 @@
 from curses import window
 import math
+from signal import NSIG
 from tkinter import X
 from numpy import sign
 from truedata_ws.websocket.TD import TD
@@ -42,28 +43,31 @@ for symobl in symbols:
 
         df = pd.DataFrame(hist_data_3)
         td_app.disconnect()
+        df["adx"] = tax.adx(high=df.h, low=df.l, close=df.c,
+                            length=14, lensig=14, mamode='rma', talib=None)['ADX_14']
+
+        df['OBV'] = tax.obv(close=df.c, volume=df.v)
+        df['TRIX'] = talib.TRIX(df['c'], timeperiod=18)*100
         df['MACD'] = ta.trend.MACD(df['c']).macd()
 
         df['rsi'] = tax.rsi(df['c'])
         df['roc'] = talib.ROCP(df['c'], timeperiod=9)
         df['Force Index'] = ta.volume.ForceIndexIndicator(
             df['c'], df['v']).force_index()
-        df['ADX'] = ta.trend.ADXIndicator(
-            df['h'], df['l'], df['c']).adx()
 
         df['CCI'] = ta.trend.CCIIndicator(
             df['h'], df['l'], df['c'], ).cci()
         df['KST'] = ta.trend.KSTIndicator(df['c']).kst()
         df['KST_Sig '] = ta.trend.KSTIndicator(df['c']).kst_sig()
 
-        df['CMO'] = tax.cmo(df['c'], length=9, talib=None)
+        df['CMO'] = tax.cmo(close=df.c, length=9, talib=False, append=True)
         df['Williams_r'] = ta.momentum.WilliamsRIndicator(
             df['h'], df['l'], df['c']).williams_r()
         df['stoch_k'] = ta.momentum.StochasticOscillator(
             df['h'], df['l'], df['c']).stoch()
         df['stoch_d'] = ta.momentum.StochasticOscillator(
             df['h'], df['l'], df['c']).stoch_signal()
-        df['trix'] = ta.trend.trix(df['c'], window=18, fillna=True)*100
+
         df['BOP'] = tax.bop(df['o'], df['h'], df['l'], df['c'])
         df['EMA_10'] = tax.ema(df['c'], length=10)
         df['EMA_11'] = tax.ema(df['c'], length=11)
@@ -82,8 +86,6 @@ for symobl in symbols:
             df['c'], window=14).aroon_up()
         df['PSAR'] = ta.trend.PSARIndicator(df['h'], df['l'], df['c']).psar()
         df['TEMA'] = talib.TEMA(df['c'])
-
-        df['OBV'] = tax.obv(df['c'], df['v'])
 
         df['MFI'] = ta.volume.MFIIndicator(
             df['h'], df['l'], df['c'], df['v']).money_flow_index()
@@ -124,7 +126,7 @@ for symobl in symbols:
         PPSR(f)
         f['R-slope'] = talib.LINEARREG_SLOPE(df['c'])
         f['mom'] = tax.mom(df['c'])
-       # f['stoch_d'], f['stoch_k'] = x['STOCHk_14_14_3'], x['STOCHd_14_14_3']
+
         print()
         f.to_excel(f"{symobl}--{barsize}.xlsx")
         del df
