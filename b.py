@@ -2,7 +2,7 @@ from curses import window
 import math
 from signal import NSIG
 from tkinter import X
-from numpy import sign
+from numpy import append, sign
 from truedata_ws.websocket.TD import TD
 import pandas as pd
 import ta
@@ -48,7 +48,8 @@ for symobl in symbols:
 
         df['OBV'] = tax.obv(close=df.c, volume=df.v)
         df['TRIX'] = talib.TRIX(df['c'], timeperiod=18)*100
-        df['MACD'] = ta.trend.MACD(df['c']).macd()
+        df['MACD'] = tax.macd(close=df.c, talib=None)['MACD_12_26_9']
+        df['MACDs_12_26_9'] = tax.macd(close=df.c, talib=None)['MACDs_12_26_9']
 
         df['rsi'] = tax.rsi(df['c'])
         df['roc'] = talib.ROCP(df['c'], timeperiod=9)
@@ -127,6 +128,6 @@ for symobl in symbols:
         f['R-slope'] = talib.LINEARREG_SLOPE(df['c'])
         f['mom'] = tax.mom(df['c'])
 
-        print()
+       # print(macd.columns)
         f.to_excel(f"{symobl}--{barsize}.xlsx")
         del df
